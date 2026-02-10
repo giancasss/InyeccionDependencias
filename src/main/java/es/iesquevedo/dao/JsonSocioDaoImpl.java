@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import es.iesquevedo.modelo.Socio;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import java.io.File;
 import java.io.FileReader;
@@ -16,11 +18,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@ApplicationScoped
 public class JsonSocioDaoImpl implements JsonSocioDao {
+
     private final File file;
     private final Gson gson;
     private List<Socio> store = new ArrayList<>();
 
+    @Inject
     public JsonSocioDaoImpl(String filePath) {
         this.file = new File(filePath);
         this.gson = new GsonBuilder().setPrettyPrinting().create();
@@ -59,7 +64,9 @@ public class JsonSocioDaoImpl implements JsonSocioDao {
 
     @Override
     public Socio save(Socio socio) {
-        store = store.stream().filter(s -> !s.getDni().equals(socio.getDni())).collect(Collectors.toList());
+        store = store.stream()
+                .filter(s -> !s.getDni().equals(socio.getDni()))
+                .collect(Collectors.toList());
         store.add(socio);
         persist();
         return socio;
@@ -67,15 +74,18 @@ public class JsonSocioDaoImpl implements JsonSocioDao {
 
     @Override
     public Socio remove(Socio socio) {
-        store = store.stream().filter(s -> !s.getDni().equals(socio.getDni())).collect(Collectors.toList());
-        store.remove(socio);
+        store = store.stream()
+                .filter(s -> !s.getDni().equals(socio.getDni()))
+                .collect(Collectors.toList());
         persist();
         return socio;
     }
 
     @Override
     public Optional<Socio> findByDni(String dni) {
-        return store.stream().filter(s -> s.getDni().equals(dni)).findFirst();
+        return store.stream()
+                .filter(s -> s.getDni().equals(dni))
+                .findFirst();
     }
 
     @Override
@@ -86,9 +96,12 @@ public class JsonSocioDaoImpl implements JsonSocioDao {
     @Override
     public boolean deleteByDni(String dni) {
         int before = store.size();
-        store = store.stream().filter(s -> !s.getDni().equals(dni)).collect(Collectors.toList());
+        store = store.stream()
+                .filter(s -> !s.getDni().equals(dni))
+                .collect(Collectors.toList());
         boolean changed = store.size() != before;
         if (changed) persist();
         return changed;
     }
 }
+
